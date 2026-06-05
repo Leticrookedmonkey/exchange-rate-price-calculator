@@ -1,0 +1,645 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Price Calculator — Crooked Monkey</title>
+<link href="https://fonts.googleapis.com/css2?family=Anton&family=Montserrat:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --yellow:    #FFD040;
+    --dark:      #212322;
+    --pink:      #F45197;
+    --blue:      #00B2E3;
+    --green:     #01DA8E;
+    --dark-soft: #2e3130;
+    --dark-card: #292b29;
+    --text-muted: #a0a49f;
+  }
+
+  body {
+    font-family: 'Montserrat', sans-serif;
+    background: var(--dark);
+    color: #f0f0ee;
+    min-height: 100vh;
+    padding: 32px 20px 48px;
+    position: relative;
+    overflow-x: hidden;
+  }
+
+  /* ── Organic background blobs ── */
+  .blob-bg {
+    position: fixed; inset: 0; pointer-events: none; z-index: 0; overflow: hidden;
+  }
+
+  /* ── Layout ── */
+  .app { max-width: 1140px; margin: 0 auto; position: relative; z-index: 1; }
+
+  /* ── Header ── */
+  header { text-align: center; margin-bottom: 40px; }
+
+  .logo-badge {
+    display: inline-flex; align-items: center; gap: 10px;
+    background: var(--yellow); border-radius: 40px;
+    padding: 6px 20px 6px 8px; margin-bottom: 20px;
+  }
+  .logo-badge .monkey { font-size: 1.4rem; }
+  .logo-badge span {
+    font-family: 'Anton', sans-serif; font-size: 0.85rem;
+    color: var(--dark); letter-spacing: 2px; text-transform: uppercase;
+  }
+
+  header h1 {
+    font-family: 'Anton', sans-serif;
+    font-size: clamp(2.2rem, 5vw, 3.2rem);
+    text-transform: uppercase;
+    color: var(--yellow);
+    letter-spacing: 1px;
+    line-height: 1.05;
+  }
+  header p {
+    font-family: 'Montserrat', sans-serif;
+    font-size: 0.85rem; color: var(--text-muted); margin-top: 8px;
+  }
+
+  .rate-badge {
+    display: inline-flex; align-items: center; gap: 8px;
+    background: var(--dark-card); border: 1px solid #3a3d3a;
+    border-radius: 40px; padding: 6px 18px;
+    font-size: 0.78rem; color: var(--text-muted); margin-top: 14px;
+  }
+  .rate-badge .live {
+    width: 8px; height: 8px; border-radius: 50%;
+    background: var(--green); display: inline-block; animation: pulse 2s infinite;
+  }
+  .rate-badge strong { color: var(--green); }
+  @keyframes pulse { 0%,100%{opacity:1} 50%{opacity:.3} }
+
+  /* ── Two-column grid ── */
+  .columns {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 20px;
+    align-items: start;
+  }
+  .col { display: flex; flex-direction: column; gap: 20px; }
+
+  /* ── Cards ── */
+  .card {
+    background: var(--dark-card);
+    border: 1px solid #3a3d3a;
+    border-radius: 20px;
+    padding: 24px;
+    position: relative;
+    overflow: hidden;
+  }
+  .card::before {
+    content: '';
+    position: absolute; top: -30px; right: -30px;
+    width: 100px; height: 100px; border-radius: 50%;
+    background: var(--yellow); opacity: 0.04; pointer-events: none;
+  }
+
+  .card-title {
+    font-family: 'Anton', sans-serif;
+    font-size: 0.8rem; text-transform: uppercase;
+    letter-spacing: 2px; color: var(--yellow);
+    margin-bottom: 20px;
+  }
+
+  .field { margin-bottom: 16px; }
+  .field:last-child { margin-bottom: 0; }
+  .field label {
+    display: block; font-size: 0.75rem; font-weight: 600;
+    color: var(--text-muted); margin-bottom: 7px; text-transform: uppercase;
+    letter-spacing: 0.8px;
+  }
+
+  /* ── Inputs ── */
+  .input-row { display: flex; gap: 8px; }
+  .input-wrap { position: relative; flex: 1; }
+  .input-wrap .prefix {
+    position: absolute; left: 13px; top: 50%; transform: translateY(-50%);
+    font-size: 0.85rem; color: var(--text-muted); pointer-events: none;
+    font-weight: 600;
+  }
+
+  input[type="number"], select {
+    width: 100%;
+    background: #1a1c1a;
+    border: 1.5px solid #3a3d3a;
+    border-radius: 12px;
+    color: #f0f0ee;
+    font-family: 'Montserrat', sans-serif;
+    font-size: 0.9rem;
+    padding: 10px 13px;
+    outline: none;
+    transition: border-color 0.2s, box-shadow 0.2s;
+    -moz-appearance: textfield;
+  }
+  input[type="number"]::-webkit-outer-spin-button,
+  input[type="number"]::-webkit-inner-spin-button { -webkit-appearance: none; }
+  input[type="number"]:focus { border-color: var(--yellow); box-shadow: 0 0 0 3px rgba(255,208,64,.12); }
+  select:focus { border-color: var(--yellow); box-shadow: 0 0 0 3px rgba(255,208,64,.12); }
+  .input-wrap input { padding-left: 30px; }
+
+  select {
+    cursor: pointer; appearance: none; padding-right: 30px;
+  }
+  .select-wrap { position: relative; }
+  .select-wrap::after {
+    content: '▾'; position: absolute; right: 12px; top: 50%;
+    transform: translateY(-50%); color: var(--text-muted);
+    pointer-events: none; font-size: 0.8rem;
+  }
+
+  /* ── Slider ── */
+  .slider-container { display: flex; align-items: center; gap: 14px; }
+  input[type="range"] {
+    flex: 1; -webkit-appearance: none; height: 5px; border-radius: 3px;
+    background: #3a3d3a; outline: none; cursor: pointer;
+  }
+  input[type="range"]::-webkit-slider-thumb {
+    -webkit-appearance: none; width: 20px; height: 20px; border-radius: 50%;
+    background: var(--yellow); cursor: pointer;
+    border: 3px solid var(--dark); box-shadow: 0 0 10px rgba(255,208,64,.4);
+  }
+  .slider-val {
+    min-width: 48px; text-align: right;
+    font-family: 'Anton', sans-serif; font-size: 1rem;
+    color: var(--yellow); letter-spacing: 1px;
+  }
+
+  /* ── Rate row ── */
+  .rate-row { display: flex; gap: 8px; align-items: center; }
+  .rate-row .select-wrap { flex: 1; }
+  .rate-row .input-wrap  { flex: 0 0 115px; }
+
+  .btn-reset {
+    background: transparent; border: 1.5px solid var(--yellow);
+    border-radius: 10px; color: var(--yellow);
+    font-family: 'Montserrat', sans-serif; font-weight: 700;
+    padding: 9px 12px; font-size: 0.78rem; cursor: pointer;
+    white-space: nowrap; transition: background 0.2s, color 0.2s;
+  }
+  .btn-reset:hover { background: var(--yellow); color: var(--dark); }
+
+  /* ── Results panel ── */
+  .results {
+    background: var(--dark-card);
+    border: 1.5px solid var(--yellow);
+    border-radius: 20px; padding: 24px;
+    position: relative; overflow: hidden;
+  }
+  .results::after {
+    content: ''; position: absolute;
+    bottom: -40px; left: -40px;
+    width: 130px; height: 130px; border-radius: 50%;
+    background: var(--yellow); opacity: 0.06; pointer-events: none;
+  }
+
+  .results-title {
+    font-family: 'Anton', sans-serif;
+    font-size: 0.8rem; text-transform: uppercase;
+    letter-spacing: 2px; color: var(--yellow);
+    margin-bottom: 20px;
+  }
+
+  .result-row {
+    display: flex; justify-content: space-between; align-items: baseline;
+    padding: 8px 0; border-bottom: 1px solid #333633;
+  }
+  .result-row:last-child { border-bottom: none; }
+  .result-label { font-size: 0.78rem; color: var(--text-muted); }
+  .result-value { font-size: 0.92rem; font-weight: 700; color: #f0f0ee; }
+  .result-value.accent { color: var(--blue); }
+  .result-value.warn   { color: var(--pink); }
+
+  /* ── Big price ── */
+  .big-price { text-align: center; padding: 20px 0 10px; }
+  .big-price .label {
+    font-family: 'Montserrat', sans-serif;
+    font-size: 0.7rem; color: var(--text-muted);
+    text-transform: uppercase; letter-spacing: 1.5px;
+  }
+  .big-price .amount {
+    font-family: 'Anton', sans-serif;
+    font-size: clamp(2rem, 4vw, 2.8rem);
+    color: var(--yellow); letter-spacing: -1px; line-height: 1.1;
+  }
+  .big-price .sub { font-size: 0.75rem; color: var(--text-muted); margin-top: 4px; }
+
+  /* ── Summary box ── */
+  .summary-box {
+    background: #1a1c1a; border-radius: 14px;
+    padding: 14px 16px; margin-top: 10px;
+  }
+  .summary-row {
+    display: flex; justify-content: space-between;
+    font-size: 0.78rem; padding: 4px 0; color: var(--text-muted);
+  }
+  .summary-row .sv { font-weight: 700; color: #d0d4d0; }
+  .summary-row.total {
+    border-top: 1px solid #3a3d3a;
+    margin-top: 7px; padding-top: 7px;
+  }
+  .summary-row.total span:first-child { font-weight: 700; color: #f0f0ee; }
+  .summary-row.total .sv { color: var(--green); font-size: 0.9rem; }
+
+  /* ── Tags ── */
+  .tag {
+    display: inline-block; font-size: 0.68rem; border-radius: 8px;
+    padding: 1px 7px; margin-left: 5px; vertical-align: middle;
+    font-weight: 700; letter-spacing: 0.5px;
+  }
+  .tag-orange { background: rgba(244,81,151,.15); border: 1px solid rgba(244,81,151,.4); color: var(--pink); }
+  .tag-green  { background: rgba(1,218,142,.12);  border: 1px solid rgba(1,218,142,.35); color: var(--green); }
+  .tag-blue   { background: rgba(0,178,227,.12);  border: 1px solid rgba(0,178,227,.35); color: var(--blue); }
+
+  /* ── VAT info card ── */
+  .vat-info-card {
+    background: var(--dark-card);
+    border: 1.5px solid rgba(244,81,151,.35);
+    border-radius: 20px; padding: 24px;
+    position: relative; overflow: hidden;
+  }
+  .vat-info-card::before {
+    content: ''; position: absolute; top: -20px; right: -20px;
+    width: 90px; height: 90px; border-radius: 50%;
+    background: var(--pink); opacity: 0.06; pointer-events: none;
+  }
+  .vat-info-title {
+    font-family: 'Anton', sans-serif;
+    font-size: 0.8rem; text-transform: uppercase;
+    letter-spacing: 2px; color: var(--pink); margin-bottom: 6px;
+  }
+  .vat-info-desc {
+    font-size: 0.73rem; color: var(--text-muted); margin-bottom: 16px;
+  }
+  .vat-result-row {
+    display: flex; justify-content: space-between; align-items: baseline;
+    padding: 7px 0; border-bottom: 1px solid #333633;
+  }
+  .vat-result-row:last-child { border-bottom: none; }
+
+  @media (max-width: 700px) {
+    .columns { grid-template-columns: 1fr; }
+    header h1 { font-size: 2rem; }
+  }
+</style>
+</head>
+<body>
+
+<!-- Organic background blobs -->
+<div class="blob-bg" aria-hidden="true">
+  <svg width="100%" height="100%" viewBox="0 0 1200 800" preserveAspectRatio="xMidYMid slice" xmlns="http://www.w3.org/2000/svg">
+    <path d="M-80,200 C0,80 180,20 300,120 C420,220 380,400 260,460 C140,520 -60,420 -80,200Z" fill="#FFD040" opacity="0.04"/>
+    <path d="M900,50 C1020,-20 1160,60 1190,200 C1220,340 1100,440 960,400 C820,360 800,200 900,50Z" fill="#F45197" opacity="0.05"/>
+    <path d="M400,650 C500,580 680,600 740,700 C800,800 700,880 560,860 C420,840 300,720 400,650Z" fill="#00B2E3" opacity="0.05"/>
+    <path d="M1050,550 C1130,500 1200,580 1180,680 C1160,780 1060,800 980,740 C900,680 970,600 1050,550Z" fill="#01DA8E" opacity="0.05"/>
+    <!-- Squiggly line -->
+    <path d="M50,700 Q120,660 160,700 Q200,740 240,700 Q280,660 320,700 Q360,740 400,700" stroke="#FFD040" stroke-width="2" fill="none" opacity="0.08"/>
+    <path d="M800,120 Q860,90 890,120 Q920,150 950,120 Q980,90 1010,120 Q1040,150 1070,120" stroke="#F45197" stroke-width="2" fill="none" opacity="0.1"/>
+  </svg>
+</div>
+
+<div class="app">
+  <header>
+    <div class="logo-badge">
+      <span class="monkey">🐒</span>
+      <span>Crooked Monkey</span>
+    </div>
+    <h1>Price Calculator</h1>
+    <p>Currency conversion · Profit Margin · VAT</p>
+    <div class="rate-badge">
+      <span class="live"></span>
+      <span id="rate-display-label">EUR</span>/USD today:&nbsp;<strong id="rate-display">1.1660</strong>
+    </div>
+  </header>
+
+  <div class="columns">
+
+    <!-- ── LEFT: inputs ── -->
+    <div class="col">
+
+      <!-- COST PRICE -->
+      <div class="card">
+        <div class="card-title">💶 Cost Price</div>
+
+        <div class="field">
+          <label>Source Currency</label>
+          <div class="select-wrap">
+            <select id="currency" onchange="onCurrencyChange()">
+              <option value="EUR" data-rate="1.1660" data-sym="€">🇪🇺 EUR — Euro</option>
+              <option value="GBP" data-rate="1.3540" data-sym="£">🇬🇧 GBP — British Pound</option>
+              <option value="CHF" data-rate="1.1980" data-sym="Fr">🇨🇭 CHF — Swiss Franc</option>
+              <option value="JPY" data-rate="0.0068"  data-sym="¥">🇯🇵 JPY — Japanese Yen</option>
+              <option value="CAD" data-rate="0.7390"  data-sym="C$">🇨🇦 CAD — Canadian Dollar</option>
+              <option value="AUD" data-rate="0.6490"  data-sym="A$">🇦🇺 AUD — Australian Dollar</option>
+              <option value="NZD" data-rate="0.6050"  data-sym="NZ$">🇳🇿 NZD — New Zealand Dollar</option>
+              <option value="MXN" data-rate="0.0520"  data-sym="$">🇲🇽 MXN — Mexican Peso</option>
+              <option value="ARS" data-rate="0.00090" data-sym="$">🇦🇷 ARS — Argentine Peso</option>
+              <option value="BRL" data-rate="0.1820"  data-sym="R$">🇧🇷 BRL — Brazilian Real</option>
+              <option value="CLP" data-rate="0.00107" data-sym="$">🇨🇱 CLP — Chilean Peso</option>
+              <option value="COP" data-rate="0.000240" data-sym="$">🇨🇴 COP — Colombian Peso</option>
+              <option value="ZAR" data-rate="0.0545"  data-sym="R">🇿🇦 ZAR — South African Rand</option>
+              <option value="NGN" data-rate="0.00063" data-sym="₦">🇳🇬 NGN — Nigerian Naira</option>
+              <option value="EGP" data-rate="0.0205"  data-sym="£">🇪🇬 EGP — Egyptian Pound</option>
+              <option value="KES" data-rate="0.00775" data-sym="KSh">🇰🇪 KES — Kenyan Shilling</option>
+              <option value="INR" data-rate="0.01195" data-sym="₹">🇮🇳 INR — Indian Rupee</option>
+              <option value="CNY" data-rate="0.1385"  data-sym="¥">🇨🇳 CNY — Chinese Yuan</option>
+              <option value="KRW" data-rate="0.000723" data-sym="₩">🇰🇷 KRW — South Korean Won</option>
+              <option value="SGD" data-rate="0.7480"  data-sym="S$">🇸🇬 SGD — Singapore Dollar</option>
+              <option value="HKD" data-rate="0.1285"  data-sym="HK$">🇭🇰 HKD — Hong Kong Dollar</option>
+              <option value="TRY" data-rate="0.0278"  data-sym="₺">🇹🇷 TRY — Turkish Lira</option>
+              <option value="RUB" data-rate="0.01175" data-sym="₽">🇷🇺 RUB — Russian Ruble</option>
+              <option value="SEK" data-rate="0.0980"  data-sym="kr">🇸🇪 SEK — Swedish Krona</option>
+              <option value="NOK" data-rate="0.0942"  data-sym="kr">🇳🇴 NOK — Norwegian Krone</option>
+              <option value="DKK" data-rate="0.1490"  data-sym="kr">🇩🇰 DKK — Danish Krone</option>
+              <option value="PLN" data-rate="0.2580"  data-sym="zł">🇵🇱 PLN — Polish Zloty</option>
+              <option value="CZK" data-rate="0.0450"  data-sym="Kč">🇨🇿 CZK — Czech Koruna</option>
+              <option value="HUF" data-rate="0.00278" data-sym="Ft">🇭🇺 HUF — Hungarian Forint</option>
+              <option value="AED" data-rate="0.2723"  data-sym="د.إ">🇦🇪 AED — UAE Dirham</option>
+              <option value="SAR" data-rate="0.2666"  data-sym="﷼">🇸🇦 SAR — Saudi Riyal</option>
+              <option value="ILS" data-rate="0.2720"  data-sym="₪">🇮🇱 ILS — Israeli Shekel</option>
+              <option value="THB" data-rate="0.0295"  data-sym="฿">🇹🇭 THB — Thai Baht</option>
+              <option value="MYR" data-rate="0.2290"  data-sym="RM">🇲🇾 MYR — Malaysian Ringgit</option>
+              <option value="IDR" data-rate="0.0000615" data-sym="Rp">🇮🇩 IDR — Indonesian Rupiah</option>
+              <option value="PHP" data-rate="0.01745" data-sym="₱">🇵🇭 PHP — Philippine Peso</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="field">
+          <label>Net Price (excl. VAT)</label>
+          <div class="input-wrap">
+            <span class="prefix" id="currency-symbol">€</span>
+            <input type="number" id="price" value="100" min="0" step="0.01" oninput="updateAll()">
+          </div>
+        </div>
+
+        <div class="field">
+          <label>Exchange Rate to USD &nbsp;<small style="color:#555;text-transform:none;letter-spacing:0">(select to prefill, or edit)</small></label>
+          <div class="rate-row">
+            <div class="select-wrap">
+              <select id="rate-preset" onchange="applyRatePreset()">
+                <option value="">— pick a rate —</option>
+                <option value="1.1660">EUR ×1.1660</option>
+                <option value="1.3540">GBP ×1.3540</option>
+                <option value="1.1980">CHF ×1.1980</option>
+                <option value="0.0068">JPY ×0.0068</option>
+                <option value="0.7390">CAD ×0.7390</option>
+                <option value="0.6490">AUD ×0.6490</option>
+                <option value="0.6050">NZD ×0.6050</option>
+                <option value="0.0520">MXN ×0.0520</option>
+                <option value="0.00090">ARS ×0.00090</option>
+                <option value="0.1820">BRL ×0.1820</option>
+                <option value="0.00107">CLP ×0.00107</option>
+                <option value="0.000240">COP ×0.000240</option>
+                <option value="0.0545">ZAR ×0.0545</option>
+                <option value="0.00063">NGN ×0.00063</option>
+                <option value="0.0205">EGP ×0.0205</option>
+                <option value="0.00775">KES ×0.00775</option>
+                <option value="0.01195">INR ×0.01195</option>
+                <option value="0.1385">CNY ×0.1385</option>
+                <option value="0.000723">KRW ×0.000723</option>
+                <option value="0.7480">SGD ×0.7480</option>
+                <option value="0.1285">HKD ×0.1285</option>
+                <option value="0.0278">TRY ×0.0278</option>
+                <option value="0.01175">RUB ×0.01175</option>
+                <option value="0.0980">SEK ×0.0980</option>
+                <option value="0.0942">NOK ×0.0942</option>
+                <option value="0.1490">DKK ×0.1490</option>
+                <option value="0.2580">PLN ×0.2580</option>
+                <option value="0.0450">CZK ×0.0450</option>
+                <option value="0.00278">HUF ×0.00278</option>
+                <option value="0.2723">AED ×0.2723</option>
+                <option value="0.2666">SAR ×0.2666</option>
+                <option value="0.2720">ILS ×0.2720</option>
+                <option value="0.0295">THB ×0.0295</option>
+                <option value="0.2290">MYR ×0.2290</option>
+                <option value="0.0000615">IDR ×0.0000615</option>
+                <option value="0.01745">PHP ×0.01745</option>
+              </select>
+            </div>
+            <div class="input-wrap">
+              <span class="prefix">×</span>
+              <input type="number" id="rate" value="1.1660" min="0.000001" step="0.0001" oninput="updateAll()">
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- PROFIT MARGIN -->
+      <div class="card">
+        <div class="card-title">📈 Profit Margin</div>
+        <div class="field">
+          <label>Drag to Adjust</label>
+          <div class="slider-container">
+            <input type="range" id="margin-slider" min="0" max="200" step="1" value="30" oninput="syncFromSlider()">
+            <span class="slider-val" id="margin-val">30%</span>
+          </div>
+        </div>
+        <div class="field">
+          <label>Or Enter Exact Margin (%)</label>
+          <div class="input-wrap">
+            <span class="prefix">%</span>
+            <input type="number" id="margin-input" value="30" min="0" max="10000" step="0.1" oninput="syncFromInput()">
+          </div>
+        </div>
+      </div>
+
+      <!-- VAT INPUT -->
+      <div class="card">
+        <div class="card-title">🧾 VAT / Tax Settings</div>
+        <div class="field">
+          <label>Reference Country</label>
+          <div class="input-row">
+            <div class="select-wrap" style="flex:1">
+              <select id="vat-preset" onchange="setVATPreset()">
+                <option value="21">🇦🇷 Argentina — 21%</option>
+                <option value="21">🇪🇸 Spain — 21%</option>
+                <option value="20">🇬🇧 UK — 20%</option>
+                <option value="19">🇩🇪 Germany — 19%</option>
+                <option value="22">🇮🇹 Italy — 22%</option>
+                <option value="20">🇫🇷 France — 20%</option>
+                <option value="25">🇸🇪 Sweden — 25%</option>
+                <option value="15">🇿🇦 South Africa — 15%</option>
+                <option value="16">🇲🇽 Mexico — 16%</option>
+                <option value="10">🇦🇺 Australia — 10%</option>
+                <option value="18">🇮🇳 India — 18%</option>
+                <option value="13">🇨🇳 China — 13%</option>
+                <option value="10">🇧🇷 Brazil — ~10%</option>
+                <option value="0">🌐 No VAT — 0%</option>
+                <option value="custom">✏️ Custom</option>
+              </select>
+            </div>
+            <div class="input-wrap" style="flex:0 0 88px">
+              <span class="prefix">%</span>
+              <input type="number" id="vat" value="21" min="0" max="100" step="0.1" oninput="updateAll()">
+            </div>
+          </div>
+        </div>
+      </div>
+
+    </div><!-- /col left -->
+
+    <!-- ── RIGHT: results ── -->
+    <div class="col">
+
+      <!-- SALE PRICE -->
+      <div class="results">
+        <div class="results-title">💰 Sale Price</div>
+
+        <div class="result-row">
+          <span class="result-label">Net price (source currency)</span>
+          <span class="result-value accent" id="r-net-orig">€ 100.00</span>
+        </div>
+        <div class="result-row">
+          <span class="result-label">Net price → USD</span>
+          <span class="result-value" id="r-net-usd">$ 116.60</span>
+        </div>
+        <div class="result-row">
+          <span class="result-label">+ Margin <span class="tag tag-green" id="r-margin-pct">30%</span></span>
+          <span class="result-value" id="r-margin-usd">$ 34.98</span>
+        </div>
+
+        <div class="big-price">
+          <div class="label">Final Sale Price (USD)</div>
+          <div class="amount" id="r-final">$ 151.58</div>
+          <div class="sub" id="r-final-orig">≈ € 130.00 in source currency</div>
+        </div>
+
+        <div class="summary-box">
+          <div class="summary-row"><span>Net price in USD</span><span class="sv" id="s-net">$ 116.60</span></div>
+          <div class="summary-row"><span>+ Margin (<span id="s-margin-pct">30%</span>)</span><span class="sv" id="s-margin">$ 34.98</span></div>
+          <div class="summary-row total">
+            <span>Sale Price</span>
+            <span class="sv" id="s-total">$ 151.58</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- VAT REFERENCE ONLY -->
+      <div class="vat-info-card">
+        <div class="vat-info-title">🧾 VAT — Reference Only</div>
+        <div class="vat-info-desc">Tax on the net purchase price. Does not affect the sale price.</div>
+
+        <div class="vat-result-row">
+          <span class="result-label">VAT <span class="tag tag-orange" id="r-vat-pct">21%</span> on net price</span>
+          <span class="result-value warn" id="r-vat-orig">€ 21.00</span>
+        </div>
+        <div class="vat-result-row">
+          <span class="result-label">VAT in USD</span>
+          <span class="result-value warn" id="r-vat-usd">$ 24.49</span>
+        </div>
+        <div class="vat-result-row">
+          <span class="result-label">Net + VAT (reference)</span>
+          <span class="result-value" style="color:var(--text-muted)" id="r-gross-orig">€ 121.00</span>
+        </div>
+      </div>
+
+    </div><!-- /col right -->
+  </div><!-- /columns -->
+</div><!-- /app -->
+
+<script>
+  const DEFAULT_RATES = {
+    EUR:1.1660, GBP:1.3540, CHF:1.1980, JPY:0.0068, CAD:0.7390,
+    AUD:0.6490, NZD:0.6050, MXN:0.0520, ARS:0.00090, BRL:0.1820,
+    CLP:0.00107, COP:0.000240, ZAR:0.0545, NGN:0.00063, EGP:0.0205,
+    KES:0.00775, INR:0.01195, CNY:0.1385, KRW:0.000723, SGD:0.7480,
+    HKD:0.1285, TRY:0.0278, RUB:0.01175, SEK:0.0980, NOK:0.0942,
+    DKK:0.1490, PLN:0.2580, CZK:0.0450, HUF:0.00278, AED:0.2723,
+    SAR:0.2666, ILS:0.2720, THB:0.0295, MYR:0.2290, IDR:0.0000615,
+    PHP:0.01745
+  };
+  const SYMBOLS = {
+    EUR:'€', GBP:'£', CHF:'Fr', JPY:'¥', CAD:'C$', AUD:'A$', NZD:'NZ$',
+    MXN:'$', ARS:'$', BRL:'R$', CLP:'$', COP:'$', ZAR:'R', NGN:'₦',
+    EGP:'£', KES:'KSh', INR:'₹', CNY:'¥', KRW:'₩', SGD:'S$', HKD:'HK$',
+    TRY:'₺', RUB:'₽', SEK:'kr', NOK:'kr', DKK:'kr', PLN:'zł', CZK:'Kč',
+    HUF:'Ft', AED:'د.إ', SAR:'﷼', ILS:'₪', THB:'฿', MYR:'RM',
+    IDR:'Rp', PHP:'₱'
+  };
+
+  function fmt(n, sym) {
+    return `${sym} ${n.toLocaleString('en-US', { minimumFractionDigits:2, maximumFractionDigits:2 })}`;
+  }
+
+  function updateAll() {
+    const price  = parseFloat(document.getElementById('price').value)        || 0;
+    const rate   = parseFloat(document.getElementById('rate').value)          || 1;
+    const margin = parseFloat(document.getElementById('margin-input').value)  || 0;
+    const vat    = parseFloat(document.getElementById('vat').value)           || 0;
+    const cur    = document.getElementById('currency').value;
+    const sym    = SYMBOLS[cur] || '€';
+
+    document.getElementById('currency-symbol').textContent    = sym;
+    document.getElementById('rate-display').textContent       = parseFloat(rate).toFixed(4);
+    document.getElementById('rate-display-label').textContent = cur;
+
+    const netUSD    = price * rate;
+    const marginAmt = netUSD * (margin / 100);
+    const saleUSD   = netUSD + marginAmt;
+    const saleOrig  = rate > 0 ? saleUSD / rate : 0;
+    const vatOrig   = price * (vat / 100);
+    const vatUSD    = vatOrig * rate;
+    const grossOrig = price + vatOrig;
+
+    document.getElementById('r-net-orig').textContent   = fmt(price, sym);
+    document.getElementById('r-net-usd').textContent    = fmt(netUSD, '$');
+    document.getElementById('r-margin-pct').textContent = margin + '%';
+    document.getElementById('r-margin-usd').textContent = fmt(marginAmt, '$');
+    document.getElementById('r-final').textContent      = fmt(saleUSD, '$');
+    document.getElementById('r-final-orig').textContent = `≈ ${fmt(saleOrig, sym)} in source currency`;
+    document.getElementById('s-net').textContent        = fmt(netUSD, '$');
+    document.getElementById('s-margin-pct').textContent = margin + '%';
+    document.getElementById('s-margin').textContent     = fmt(marginAmt, '$');
+    document.getElementById('s-total').textContent      = fmt(saleUSD, '$');
+    document.getElementById('r-vat-pct').textContent    = vat + '%';
+    document.getElementById('r-vat-orig').textContent   = fmt(vatOrig, sym);
+    document.getElementById('r-vat-usd').textContent    = fmt(vatUSD, '$');
+    document.getElementById('r-gross-orig').textContent = fmt(grossOrig, sym);
+  }
+
+  function onCurrencyChange() {
+    const cur = document.getElementById('currency').value;
+    document.getElementById('rate').value = DEFAULT_RATES[cur] || 1;
+    const rp = document.getElementById('rate-preset');
+    const target = String(DEFAULT_RATES[cur]);
+    rp.value = '';
+    for (let o of rp.options) { if (o.value === target) { rp.value = o.value; break; } }
+    updateAll();
+  }
+
+  function applyRatePreset() {
+    const v = document.getElementById('rate-preset').value;
+    if (v) { document.getElementById('rate').value = v; updateAll(); }
+  }
+
+  function syncFromSlider() {
+    const v = document.getElementById('margin-slider').value;
+    document.getElementById('margin-input').value = v;
+    document.getElementById('margin-val').textContent = v + '%';
+    updateAll();
+  }
+
+  function syncFromInput() {
+    const v = parseFloat(document.getElementById('margin-input').value) || 0;
+    document.getElementById('margin-slider').value = Math.min(v, 200);
+    document.getElementById('margin-val').textContent = v + '%';
+    updateAll();
+  }
+
+  function setVATPreset() {
+    const v = document.getElementById('vat-preset').value;
+    if (v !== 'custom') { document.getElementById('vat').value = v; updateAll(); }
+  }
+
+  updateAll();
+</script>
+</body>
+</html>
