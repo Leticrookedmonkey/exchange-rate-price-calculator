@@ -314,8 +314,9 @@
     <h1>Price Calculator</h1>
     <p>Currency conversion · Profit Margin · VAT</p>
     <div class="rate-badge">
-      <span class="live"></span>
-      <span id="rate-display-label">EUR</span>/USD today:&nbsp;<strong id="rate-display">1.1660</strong>
+      <span class="live" id="rate-live-dot" style="background:var(--text-muted)"></span>
+      <span id="rate-display-label">EUR</span>/USD:&nbsp;<strong id="rate-display">—</strong>
+      &nbsp;<span id="rate-status" style="font-size:0.72rem; color:var(--text-muted)">fetching…</span>
     </div>
   </header>
 
@@ -546,7 +547,8 @@
 </div><!-- /app -->
 
 <script>
-  const DEFAULT_RATES = {
+  // ── Fallback rates (used if API is unreachable) ──────────────────────────
+  const FALLBACK_RATES = {
     EUR:1.1660, GBP:1.3540, CHF:1.1980, JPY:0.0068, CAD:0.7390,
     AUD:0.6490, NZD:0.6050, MXN:0.0520, ARS:0.00090, BRL:0.1820,
     CLP:0.00107, COP:0.000240, ZAR:0.0545, NGN:0.00063, EGP:0.0205,
@@ -556,6 +558,7 @@
     SAR:0.2666, ILS:0.2720, THB:0.0295, MYR:0.2290, IDR:0.0000615,
     PHP:0.01745
   };
+
   const SYMBOLS = {
     EUR:'€', GBP:'£', CHF:'Fr', JPY:'¥', CAD:'C$', AUD:'A$', NZD:'NZ$',
     MXN:'$', ARS:'$', BRL:'R$', CLP:'$', COP:'$', ZAR:'R', NGN:'₦',
@@ -565,10 +568,99 @@
     IDR:'Rp', PHP:'₱'
   };
 
+  // Live rates populated from API (starts as copy of fallback)
+  let LIVE_RATES = { ...FALLBACK_RATES };
+  const CACHE_KEY  = 'cm_rates_cache';
+  const CACHE_DATE = 'cm_rates_date';
+
+  // ── Frankfurter.app fetches all currencies vs USD in one call ─────────────
+  // The API returns rates FROM a base currency. We use USD as base and invert.
+  // Supported: https://api.frankfurter.app/currencies
+  async function fetchRates() {
+    const today = new Date().toISOString().slice(0, 10); // YYYY-MM-DD
+
+    // Check localStorage cache — only re-fetch if date has changed
+    try {
+      const cachedDate  = localStorage.getItem(CACHE_DATE);
+      const cachedRates = localStorage.getItem(CACHE_KEY);
+      if (cachedDate === today && cachedRates) {
+        LIVE_RATES = { ...FALLBACK_RATES, ...JSON.parse(cachedRates) };
+        setRateBadge('live', `Updated ${today}`);
+        onCurrencyChange();
+        return;
+      }
+    } catch(e) { /* localStorage unavailable — skip cache */ }
+
+    // Frankfurter: base=USD, get rates for all currencies we need
+    // Response: { base:'USD', rates:{ EUR:0.857, GBP:0.738, ... } }
+    // We want X→USD, so we invert: USD/EUR = 1 / rates.EUR
+    const needed = Object.keys(FALLBACK_RATES).filter(c => c !== 'USD').join(',');
+    const url = `https://api.frankfurter.app/latest?base=USD&symbols=${needed}`;
+
+    try {
+      const res  = await fetch(url);
+      const data = await res.json();
+      if (!data.rates) throw new Error('Bad response');
+
+      const converted = {};
+      for (const [cur, rateFromUSD] of Object.entries(data.rates)) {
+        // rateFromUSD = how many `cur` per 1 USD
+        // We want: how many USD per 1 `cur` → invert
+        converted[cur] = 1 / rateFromUSD;
+      }
+
+      LIVE_RATES = { ...FALLBACK_RATES, ...converted };
+
+      // Cache to localStorage
+      try {
+        localStorage.setItem(CACHE_KEY, JSON.stringify(converted));
+        localStorage.setItem(CACHE_DATE, today);
+      } catch(e) {}
+
+      setRateBadge('live', `Updated ${today}`);
+    } catch (err) {
+      console.warn('Rate fetch failed, using fallback rates.', err);
+      setRateBadge('stale', 'Offline — fallback rates');
+    }
+
+    onCurrencyChange();
+  }
+
+  function setRateBadge(state, label) {
+    const dot    = document.getElementById('rate-live-dot');
+    const status = document.getElementById('rate-status');
+    status.textContent = label;
+    if (state === 'live') {
+      dot.style.background = 'var(--green)';
+    } else {
+      dot.style.background = 'var(--pink)';
+    }
+  }
+
+  // ── Also refresh the rate-preset dropdown labels with live values ─────────
+  function refreshPresetDropdown() {
+    const rp = document.getElementById('rate-preset');
+    // Update each option's value and label text to reflect live rate
+    for (let opt of rp.options) {
+      if (!opt.value || opt.value === '') continue;
+      // Find which currency this option belongs to by matching the label text
+      const match = opt.textContent.match(/^(\S+)\s/);
+      if (!match) continue;
+      const cur = match[1];
+      if (LIVE_RATES[cur] !== undefined) {
+        const r = LIVE_RATES[cur];
+        opt.value = r;
+        opt.textContent = `${cur} ×${r.toFixed(r < 0.01 ? 6 : r < 1 ? 4 : 4)}`;
+      }
+    }
+  }
+
+  // ── Formatting ────────────────────────────────────────────────────────────
   function fmt(n, sym) {
     return `${sym} ${n.toLocaleString('en-US', { minimumFractionDigits:2, maximumFractionDigits:2 })}`;
   }
 
+  // ── Main calculation ──────────────────────────────────────────────────────
   function updateAll() {
     const price  = parseFloat(document.getElementById('price').value)        || 0;
     const rate   = parseFloat(document.getElementById('rate').value)          || 1;
@@ -578,7 +670,7 @@
     const sym    = SYMBOLS[cur] || '€';
 
     document.getElementById('currency-symbol').textContent    = sym;
-    document.getElementById('rate-display').textContent       = parseFloat(rate).toFixed(4);
+    document.getElementById('rate-display').textContent       = parseFloat(rate).toFixed(rate < 0.01 ? 6 : 4);
     document.getElementById('rate-display-label').textContent = cur;
 
     const netUSD    = price * rate;
@@ -606,12 +698,15 @@
   }
 
   function onCurrencyChange() {
-    const cur = document.getElementById('currency').value;
-    document.getElementById('rate').value = DEFAULT_RATES[cur] || 1;
+    const cur  = document.getElementById('currency').value;
+    const rate = LIVE_RATES[cur] || FALLBACK_RATES[cur] || 1;
+    document.getElementById('rate').value = rate;
+    // Sync preset dropdown
     const rp = document.getElementById('rate-preset');
-    const target = String(DEFAULT_RATES[cur]);
     rp.value = '';
-    for (let o of rp.options) { if (o.value === target) { rp.value = o.value; break; } }
+    for (let o of rp.options) {
+      if (parseFloat(o.value).toFixed(8) === rate.toFixed(8)) { rp.value = o.value; break; }
+    }
     updateAll();
   }
 
@@ -639,7 +734,10 @@
     if (v !== 'custom') { document.getElementById('vat').value = v; updateAll(); }
   }
 
-  updateAll();
+  // ── Boot ─────────────────────────────────────────────────────────────────
+  // Show fallback immediately so the UI isn't blank, then fetch live rates
+  onCurrencyChange();
+  fetchRates();
 </script>
 </body>
 </html>
