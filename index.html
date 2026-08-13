@@ -24,7 +24,7 @@
     background: var(--dark);
     color: #f0f0ee;
     min-height: 100vh;
-    padding: 32px 20px 48px;
+    padding: 18px 16px 28px;
     position: relative;
     overflow-x: hidden;
   }
@@ -38,12 +38,12 @@
   .app { max-width: 1140px; margin: 0 auto; position: relative; z-index: 1; }
 
   /* ── Header ── */
-  header { text-align: center; margin-bottom: 40px; }
+  header { text-align: center; margin-bottom: 20px; }
 
   .logo-badge {
     display: inline-flex; align-items: center; gap: 10px;
     background: var(--yellow); border-radius: 40px;
-    padding: 6px 20px 6px 8px; margin-bottom: 20px;
+    padding: 4px 16px 4px 6px; margin-bottom: 10px;
   }
   .logo-badge .monkey { font-size: 1.4rem; }
   .logo-badge span {
@@ -53,7 +53,7 @@
 
   header h1 {
     font-family: 'Anton', sans-serif;
-    font-size: clamp(2.2rem, 5vw, 3.2rem);
+    font-size: clamp(1.6rem, 3.4vw, 2.2rem);
     text-transform: uppercase;
     color: var(--yellow);
     letter-spacing: 1px;
@@ -61,14 +61,14 @@
   }
   header p {
     font-family: 'Montserrat', sans-serif;
-    font-size: 0.85rem; color: var(--text-muted); margin-top: 8px;
+    font-size: 0.78rem; color: var(--text-muted); margin-top: 4px;
   }
 
   .rate-badge {
     display: inline-flex; align-items: center; gap: 8px;
     background: var(--dark-card); border: 1px solid #3a3d3a;
-    border-radius: 40px; padding: 6px 18px;
-    font-size: 0.78rem; color: var(--text-muted); margin-top: 14px;
+    border-radius: 40px; padding: 4px 14px;
+    font-size: 0.72rem; color: var(--text-muted); margin-top: 8px;
   }
   .rate-badge .live {
     width: 8px; height: 8px; border-radius: 50%;
@@ -81,17 +81,17 @@
   .columns {
     display: grid;
     grid-template-columns: 1fr 1fr;
-    gap: 20px;
+    gap: 14px;
     align-items: start;
   }
-  .col { display: flex; flex-direction: column; gap: 20px; }
+  .col { display: flex; flex-direction: column; gap: 14px; }
 
   /* ── Cards ── */
   .card {
     background: var(--dark-card);
     border: 1px solid #3a3d3a;
-    border-radius: 20px;
-    padding: 24px;
+    border-radius: 18px;
+    padding: 16px 18px;
     position: relative;
     overflow: hidden;
   }
@@ -104,16 +104,16 @@
 
   .card-title {
     font-family: 'Anton', sans-serif;
-    font-size: 0.8rem; text-transform: uppercase;
+    font-size: 0.74rem; text-transform: uppercase;
     letter-spacing: 2px; color: var(--yellow);
-    margin-bottom: 20px;
+    margin-bottom: 12px;
   }
 
-  .field { margin-bottom: 16px; }
+  .field { margin-bottom: 10px; }
   .field:last-child { margin-bottom: 0; }
   .field label {
     display: block; font-size: 0.75rem; font-weight: 600;
-    color: var(--text-muted); margin-bottom: 7px; text-transform: uppercase;
+    color: var(--text-muted); margin-bottom: 4px; text-transform: uppercase;
     letter-spacing: 0.8px;
   }
 
@@ -133,8 +133,8 @@
     border-radius: 12px;
     color: #f0f0ee;
     font-family: 'Montserrat', sans-serif;
-    font-size: 0.9rem;
-    padding: 10px 13px;
+    font-size: 0.88rem;
+    padding: 8px 12px;
     outline: none;
     transition: border-color 0.2s, box-shadow 0.2s;
     -moz-appearance: textfield;
@@ -190,7 +190,7 @@
   .results {
     background: var(--dark-card);
     border: 1.5px solid var(--yellow);
-    border-radius: 20px; padding: 24px;
+    border-radius: 18px; padding: 16px 18px;
     position: relative; overflow: hidden;
   }
   .results::after {
@@ -202,14 +202,14 @@
 
   .results-title {
     font-family: 'Anton', sans-serif;
-    font-size: 0.8rem; text-transform: uppercase;
+    font-size: 0.74rem; text-transform: uppercase;
     letter-spacing: 2px; color: var(--yellow);
-    margin-bottom: 20px;
+    margin-bottom: 12px;
   }
 
   .result-row {
     display: flex; justify-content: space-between; align-items: baseline;
-    padding: 8px 0; border-bottom: 1px solid #333633;
+    padding: 5px 0; border-bottom: 1px solid #333633;
   }
   .result-row:last-child { border-bottom: none; }
   .result-label { font-size: 0.78rem; color: var(--text-muted); }
@@ -218,7 +218,7 @@
   .result-value.warn   { color: var(--pink); }
 
   /* ── Big price ── */
-  .big-price { text-align: center; padding: 20px 0 10px; }
+  .big-price { text-align: center; padding: 8px 0 4px; }
   .big-price .label {
     font-family: 'Montserrat', sans-serif;
     font-size: 0.7rem; color: var(--text-muted);
@@ -226,19 +226,19 @@
   }
   .big-price .amount {
     font-family: 'Anton', sans-serif;
-    font-size: clamp(2rem, 4vw, 2.8rem);
+    font-size: clamp(1.6rem, 3.2vw, 2.2rem);
     color: var(--yellow); letter-spacing: -1px; line-height: 1.1;
   }
   .big-price .sub { font-size: 0.75rem; color: var(--text-muted); margin-top: 4px; }
 
   /* ── Summary box ── */
   .summary-box {
-    background: #1a1c1a; border-radius: 14px;
-    padding: 14px 16px; margin-top: 10px;
+    background: #1a1c1a; border-radius: 12px;
+    padding: 10px 14px; margin-top: 6px;
   }
   .summary-row {
     display: flex; justify-content: space-between;
-    font-size: 0.78rem; padding: 4px 0; color: var(--text-muted);
+    font-size: 0.76rem; padding: 2px 0; color: var(--text-muted);
   }
   .summary-row .sv { font-weight: 700; color: #d0d4d0; }
   .summary-row.total {
@@ -262,7 +262,7 @@
   .vat-info-card {
     background: var(--dark-card);
     border: 1.5px solid rgba(244,81,151,.35);
-    border-radius: 20px; padding: 24px;
+    border-radius: 18px; padding: 16px 18px;
     position: relative; overflow: hidden;
   }
   .vat-info-card::before {
@@ -273,16 +273,52 @@
   .vat-info-title {
     font-family: 'Anton', sans-serif;
     font-size: 0.8rem; text-transform: uppercase;
-    letter-spacing: 2px; color: var(--pink); margin-bottom: 6px;
+    letter-spacing: 2px; color: var(--pink); margin-bottom: 4px;
   }
   .vat-info-desc {
-    font-size: 0.73rem; color: var(--text-muted); margin-bottom: 16px;
+    font-size: 0.72rem; color: var(--text-muted); margin-bottom: 10px;
   }
   .vat-result-row {
     display: flex; justify-content: space-between; align-items: baseline;
-    padding: 7px 0; border-bottom: 1px solid #333633;
+    padding: 5px 0; border-bottom: 1px solid #333633;
   }
   .vat-result-row:last-child { border-bottom: none; }
+
+  /* ── Big VAT total (mirrors .big-price, in pink) ── */
+  .big-vat-box {
+    background: linear-gradient(180deg, rgba(244,81,151,.14), rgba(244,81,151,.05));
+    border: 1.5px solid var(--pink);
+    border-radius: 14px;
+    padding: 10px 16px 8px;
+    margin-top: 10px;
+    text-align: center;
+    position: relative;
+    overflow: hidden;
+  }
+  .big-vat-box::before {
+    content: '';
+    position: absolute; top: -26px; right: -26px;
+    width: 90px; height: 90px; border-radius: 50%;
+    background: var(--pink); opacity: 0.12; pointer-events: none;
+  }
+  .big-vat-box .label {
+    font-family: 'Montserrat', sans-serif;
+    font-size: 0.7rem; color: var(--text-muted);
+    text-transform: uppercase; letter-spacing: 1.5px;
+    position: relative; z-index: 1;
+  }
+  .big-vat-box .amount {
+    font-family: 'Anton', sans-serif;
+    font-size: clamp(1.5rem, 3vw, 2rem);
+    color: var(--pink); letter-spacing: -1px; line-height: 1.15;
+    margin-top: 1px;
+    text-shadow: 0 0 26px rgba(244,81,151,.45);
+    position: relative; z-index: 1;
+  }
+  .big-vat-box .sub {
+    font-size: 0.75rem; color: var(--text-muted); margin-top: 4px;
+    position: relative; z-index: 1;
+  }
 
   @media (max-width: 700px) {
     .columns { grid-template-columns: 1fr; }
@@ -312,7 +348,7 @@
       <span>Crooked Monkey</span>
     </div>
     <h1>Price Calculator</h1>
-    <p>Currency conversion · Profit Margin · VAT</p>
+    <p>Currency conversion · Markup · VAT</p>
     <div class="rate-badge">
       <span class="live" id="rate-live-dot" style="background:var(--text-muted)"></span>
       <span id="rate-display-label">EUR</span>/USD:&nbsp;<strong id="rate-display">—</strong>
@@ -377,7 +413,7 @@
           <label>Net Price (excl. VAT)</label>
           <div class="input-wrap">
             <span class="prefix" id="currency-symbol">€</span>
-            <input type="number" id="price" value="100" min="0" step="0.01" oninput="updateAll()">
+            <input type="number" id="price" value="0" min="0" step="0.01" oninput="updateAll()">
           </div>
         </div>
 
@@ -435,19 +471,19 @@
 
       <!-- PROFIT MARGIN -->
       <div class="card">
-        <div class="card-title">📈 Profit Margin</div>
+        <div class="card-title">📈 Markup</div>
         <div class="field">
           <label>Drag to Adjust</label>
           <div class="slider-container">
-            <input type="range" id="margin-slider" min="0" max="200" step="1" value="30" oninput="syncFromSlider()">
-            <span class="slider-val" id="margin-val">30%</span>
+            <input type="range" id="margin-slider" min="1" max="5" step="0.01" value="1.55" oninput="syncFromSlider()">
+            <span class="slider-val" id="margin-val">×1.55</span>
           </div>
         </div>
         <div class="field">
-          <label>Or Enter Exact Margin (%)</label>
+          <label>Markup Multiplier <small style="color:var(--text-muted);text-transform:none;letter-spacing:0;font-weight:400">— 1.55 suggested</small></label>
           <div class="input-wrap">
-            <span class="prefix">%</span>
-            <input type="number" id="margin-input" value="30" min="0" max="10000" step="0.1" oninput="syncFromInput()">
+            <span class="prefix">×</span>
+            <input type="number" id="margin-input" value="1.55" min="1" max="100" step="0.01" oninput="syncFromInput()">
           </div>
         </div>
       </div>
@@ -460,6 +496,7 @@
           <div class="input-row">
             <div class="select-wrap" style="flex:1">
               <select id="vat-preset" onchange="setVATPreset()">
+                <option value="23" selected>Custom — 23%</option>
                 <option value="21">🇦🇷 Argentina — 21%</option>
                 <option value="21">🇪🇸 Spain — 21%</option>
                 <option value="20">🇬🇧 UK — 20%</option>
@@ -479,7 +516,7 @@
             </div>
             <div class="input-wrap" style="flex:0 0 88px">
               <span class="prefix">%</span>
-              <input type="number" id="vat" value="21" min="0" max="100" step="0.1" oninput="updateAll()">
+              <input type="number" id="vat" value="23" min="0" max="100" step="0.1" oninput="updateAll()">
             </div>
           </div>
         </div>
@@ -503,7 +540,7 @@
           <span class="result-value" id="r-net-usd">$ 116.60</span>
         </div>
         <div class="result-row">
-          <span class="result-label">+ Margin <span class="tag tag-green" id="r-margin-pct">30%</span></span>
+          <span class="result-label">× Markup <span class="tag tag-green" id="r-markup-mult">×1.55</span></span>
           <span class="result-value" id="r-margin-usd">$ 34.98</span>
         </div>
 
@@ -515,7 +552,7 @@
 
         <div class="summary-box">
           <div class="summary-row"><span>Net price in USD</span><span class="sv" id="s-net">$ 116.60</span></div>
-          <div class="summary-row"><span>+ Margin (<span id="s-margin-pct">30%</span>)</span><span class="sv" id="s-margin">$ 34.98</span></div>
+          <div class="summary-row"><span>× Markup (<span id="s-markup-mult">×1.55</span>)</span><span class="sv" id="s-margin">$ 34.98</span></div>
           <div class="summary-row total">
             <span>Sale Price</span>
             <span class="sv" id="s-total">$ 151.58</span>
@@ -525,8 +562,8 @@
 
       <!-- VAT REFERENCE ONLY -->
       <div class="vat-info-card">
-        <div class="vat-info-title">🧾 VAT — Reference Only</div>
-        <div class="vat-info-desc">Tax on the net purchase price. Does not affect the sale price.</div>
+        <div class="vat-info-title">🧾 VAT — <span id="vat-title-pct">23</span>% of Net Cost</div>
+        <div class="vat-info-desc">Calculated on net price. Does not affect the sale price.</div>
 
         <div class="vat-result-row">
           <span class="result-label">VAT <span class="tag tag-orange" id="r-vat-pct">21%</span> on net price</span>
@@ -539,6 +576,28 @@
         <div class="vat-result-row">
           <span class="result-label">Net + VAT (reference)</span>
           <span class="result-value" style="color:var(--text-muted)" id="r-gross-orig">€ 121.00</span>
+        </div>
+        <div class="vat-result-row" style="padding-top:8px; margin-top:2px; border-top:1px solid #3a1a00; border-bottom:none; flex-wrap:wrap; gap:6px; align-items:center">
+          <span class="result-label" style="flex:1 0 100%; color:#888; margin-bottom:4px">Multiply VAT by quantity</span>
+          <div style="display:flex; align-items:center; gap:8px; flex:1">
+            <span style="font-size:0.78rem; color:var(--text-muted)">VAT per unit</span>
+            <span class="result-value warn" id="r-vat-unit-orig" style="font-size:0.85rem">€ 23.00</span>
+          </div>
+          <span style="color:var(--text-muted); font-size:0.85rem">×</span>
+          <div class="input-wrap" style="flex:0 0 80px; position:relative">
+            <input type="number" id="vat-qty" value="1" min="1" step="1"
+              style="background:#1a1200; border:1.5px solid rgba(244,81,151,.3); border-radius:10px;
+                     color:#f0f0ee; font-family:Montserrat,sans-serif; font-size:0.88rem;
+                     padding:7px 10px; width:100%; outline:none;"
+              oninput="updateAll()">
+          </div>
+          <span style="color:var(--text-muted); font-size:0.85rem">=</span>
+          <span class="result-value warn" id="r-vat-total-orig" style="font-size:0.95rem">€ 23.00</span>
+        </div>
+        <div class="big-vat-box">
+          <div class="label">Total VAT × Qty (USD)</div>
+          <div class="amount" id="r-vat-total-usd">$ 26.68</div>
+          <div class="sub" id="r-vat-total-orig-sub">≈ € 23.00 in source currency</div>
         </div>
       </div>
 
@@ -664,7 +723,7 @@
   function updateAll() {
     const price  = parseFloat(document.getElementById('price').value)        || 0;
     const rate   = parseFloat(document.getElementById('rate').value)          || 1;
-    const margin = parseFloat(document.getElementById('margin-input').value)  || 0;
+    const markup = parseFloat(document.getElementById('margin-input').value)  || 1;
     const vat    = parseFloat(document.getElementById('vat').value)           || 0;
     const cur    = document.getElementById('currency').value;
     const sym    = SYMBOLS[cur] || '€';
@@ -674,27 +733,35 @@
     document.getElementById('rate-display-label').textContent = cur;
 
     const netUSD    = price * rate;
-    const marginAmt = netUSD * (margin / 100);
-    const saleUSD   = netUSD + marginAmt;
+    const saleUSD   = netUSD * markup;
+    const marginAmt = saleUSD - netUSD;
     const saleOrig  = rate > 0 ? saleUSD / rate : 0;
     const vatOrig   = price * (vat / 100);
     const vatUSD    = vatOrig * rate;
     const grossOrig = price + vatOrig;
+    const vatQty    = parseInt(document.getElementById('vat-qty').value) || 1;
+    const vatTotalOrig = vatOrig * vatQty;
+    const vatTotalUSD  = vatUSD  * vatQty;
 
     document.getElementById('r-net-orig').textContent   = fmt(price, sym);
     document.getElementById('r-net-usd').textContent    = fmt(netUSD, '$');
-    document.getElementById('r-margin-pct').textContent = margin + '%';
+    document.getElementById('r-markup-mult').textContent = '×' + markup.toFixed(2);
     document.getElementById('r-margin-usd').textContent = fmt(marginAmt, '$');
     document.getElementById('r-final').textContent      = fmt(saleUSD, '$');
     document.getElementById('r-final-orig').textContent = `≈ ${fmt(saleOrig, sym)} in source currency`;
     document.getElementById('s-net').textContent        = fmt(netUSD, '$');
-    document.getElementById('s-margin-pct').textContent = margin + '%';
+    document.getElementById('s-markup-mult').textContent = '×' + markup.toFixed(2);
     document.getElementById('s-margin').textContent     = fmt(marginAmt, '$');
     document.getElementById('s-total').textContent      = fmt(saleUSD, '$');
     document.getElementById('r-vat-pct').textContent    = vat + '%';
+    document.getElementById('vat-title-pct').textContent = vat;
     document.getElementById('r-vat-orig').textContent   = fmt(vatOrig, sym);
     document.getElementById('r-vat-usd').textContent    = fmt(vatUSD, '$');
     document.getElementById('r-gross-orig').textContent = fmt(grossOrig, sym);
+    document.getElementById('r-vat-unit-orig').textContent  = fmt(vatOrig, sym);
+    document.getElementById('r-vat-total-orig').textContent = fmt(vatTotalOrig, sym);
+    document.getElementById('r-vat-total-usd').textContent  = fmt(vatTotalUSD, '$');
+    document.getElementById('r-vat-total-orig-sub').textContent = `≈ ${fmt(vatTotalOrig, sym)} in source currency`;
   }
 
   function onCurrencyChange() {
@@ -716,16 +783,16 @@
   }
 
   function syncFromSlider() {
-    const v = document.getElementById('margin-slider').value;
+    const v = parseFloat(document.getElementById('margin-slider').value).toFixed(2);
     document.getElementById('margin-input').value = v;
-    document.getElementById('margin-val').textContent = v + '%';
+    document.getElementById('margin-val').textContent = '×' + v;
     updateAll();
   }
 
   function syncFromInput() {
-    const v = parseFloat(document.getElementById('margin-input').value) || 0;
-    document.getElementById('margin-slider').value = Math.min(v, 200);
-    document.getElementById('margin-val').textContent = v + '%';
+    const v = parseFloat(document.getElementById('margin-input').value) || 1;
+    document.getElementById('margin-slider').value = Math.min(v, 5);
+    document.getElementById('margin-val').textContent = '×' + v.toFixed(2);
     updateAll();
   }
 
