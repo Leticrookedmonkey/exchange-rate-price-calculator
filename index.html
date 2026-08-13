@@ -634,7 +634,7 @@
 
   // ── Frankfurter.app fetches all currencies vs USD in one call ─────────────
   // The API returns rates FROM a base currency. We use USD as base and invert.
-  // Supported: https://api.frankfurter.app/currencies
+  // Supported: https://api.frankfurter.dev/v1/currencies
   async function fetchRates() {
     const today = new Date().toISOString().slice(0, 10); // YYYY-MM-DD
 
@@ -653,13 +653,29 @@
     // Frankfurter: base=USD, get rates for all currencies we need
     // Response: { base:'USD', rates:{ EUR:0.857, GBP:0.738, ... } }
     // We want X→USD, so we invert: USD/EUR = 1 / rates.EUR
+    // Frankfurter's public API moved from api.frankfurter.app to api.frankfurter.dev
+    // (the /v1/ path keeps the same base/symbols params as before). Try the current
+    // host first, and fall back to the old one in case it's ever restored.
     const needed = Object.keys(FALLBACK_RATES).filter(c => c !== 'USD').join(',');
-    const url = `https://api.frankfurter.app/latest?base=USD&symbols=${needed}`;
+    const urls = [
+      `https://api.frankfurter.dev/v1/latest?base=USD&symbols=${needed}`,
+      `https://api.frankfurter.app/latest?base=USD&symbols=${needed}`
+    ];
 
     try {
-      const res  = await fetch(url);
-      const data = await res.json();
-      if (!data.rates) throw new Error('Bad response');
+      let data = null;
+      let lastErr = null;
+      for (const url of urls) {
+        try {
+          const res = await fetch(url);
+          if (!res.ok) throw new Error(`HTTP ${res.status}`);
+          const json = await res.json();
+          if (!json.rates) throw new Error('Bad response');
+          data = json;
+          break;
+        } catch (e) { lastErr = e; }
+      }
+      if (!data) throw lastErr || new Error('All rate sources failed');
 
       const converted = {};
       for (const [cur, rateFromUSD] of Object.entries(data.rates)) {
